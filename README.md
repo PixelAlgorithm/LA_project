@@ -1,13 +1,17 @@
 # Economic Ripple Simulator
 
-An interactive, web-based Leontief Input-Output Model simulator built using pure Python via **PyScript**.
+**A Linear Algebra Course Project**
 
-This tool allows you to input custom matrix coefficients and demand for various economic sectors. It solves the Leontief equation `X = (I - A)^-1 D` entirely inside the browser without requiring any backend server, dynamically demonstrating the hidden chain reactions (ripple effects) across industries.
+An interactive, web-based Leontief Input-Output Model simulator built using pure Python via **PyScript**. This tool allows you to input custom matrix coefficients and demand for various economic sectors. It solves the Leontief equation `X = (I - A)^-1 D` entirely inside the browser using Linear Algebra matrices, demonstrating the hidden chain reactions (ripple effects) across industries.
 
-## Features
-- **Browser-Native Python**: Powered by PyScript & NumPy via WebAssembly.
-- **Leontief Inverse Breakdown**: Auto-generates a human-friendly story explaining how demand scales through the economic supply chain.
-- **Beautiful UI**: Glassmorphism and responsive design out-of-the-box.
+## Contributors
+
+| SRN | Name |
+| :--- | :--- |
+| PES2UG24CS910 | Prajwal M |
+| PES2UG24CS150 | Deepthi V |
+| PES2UG24CS917 | R.P Pranav |
+| PES2UG24CS159 | Dimpal N |
 
 ---
 
@@ -22,7 +26,7 @@ Since all the Python logic runs in the browser, deploying this app is incredibly
 5. Under "Branch", select `main` (or `master`) and select the `/ (root)` folder.
 6. Click **Save**.
 
-After a minute or two, GitHub will provide you with a live URL (usually `https://PixelAlgorithm.github.io/LA_project`). Anyone can visit that link, the browser will download PyScript, and the app will run perfectly!
+After a minute or two, GitHub will provide you with a live URL. Anyone can visit that link, the browser will download PyScript, and the app will run perfectly!
 
 ## Run Locally
 To test it on your local machine, open a terminal in this directory and start a simple web server:
