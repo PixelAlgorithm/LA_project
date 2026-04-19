@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economic Ripple Simulator</title>
+    
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="header-icon">🌍</div>
+            <h1>Economic Ripple Effect Analyzer</h1>
+            <p>Using the Leontief Input-Output Model</p>
+        </header>
+
+        <!-- INPUT CARD -->
+        <section class="card frosted">
+            <h2>Configure Economy Size</h2>
+            <div class="control-group">
+                <div class="input-wrapper">
+                    <label for="size_entry">Number of Sectors</label>
+                    <input type="number" id="size_entry" placeholder="e.g., 4" value="4" min="1" max="20">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" py-click="generate_fields">Generate Matrix</button>
+                    <button class="btn btn-secondary" py-click="load_sample">Load Sample</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MATRIX FIELDS -->
+        <section class="card frosted matrix-section">
+            <h2>Input-Output Matrix & Demand</h2>
+            <p class="subtitle">Enter the input-output coefficients and the final demand for each sector.</p>
+            <div id="matrix_card">
+                <!-- Dynamically generated fields will go here -->
+                <div class="empty-state">Click "Generate Matrix" or "Load Sample" to begin.</div>
+            </div>
+            <div class="action-row">
+                <button class="btn btn-success" py-click="calculate">🚀 Calculate Output</button>
+            </div>
+        </section>
+
+        <!-- REPORTS -->
+        <div class="reports-grid">
+            <section class="card frosted report-card">
+                <h2>📊 Basic Report</h2>
+                <div id="basic_report" class="report-content">
+                    <p class="placeholder-text">Calculation results will appear here.</p>
+                </div>
+            </section>
+            
+            <section class="card frosted report-card">
+                <h2>🔍 Full Detail Report</h2>
+                <div id="full_report" class="report-content">
+                    <p class="placeholder-text">Interactive breakdown of the ripple effects will appear here.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Loading overlay for PyScript startup -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Initializing Python Environment...</p>
+    </div>
+
+    <!-- Remove loading screen when Pyodide finishes initializing -->
+    <script>
+        window.addEventListener('py:ready', () => {
+            document.getElementById('loading').style.display = 'none';
+        });
+    </script>
+
+    <!-- PyScript Logic -->
+    <script type="py" src="./logic.py" config='{"packages":["numpy"]}'></script>
+
+</body>
+</html>
