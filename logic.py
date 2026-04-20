@@ -166,14 +166,29 @@ async def calculate(event=None):
         chat_el = document.getElementById("chat_section")
         if chat_el: chat_el.style.display = "none"
 
-        report_text = f"Economy Size: {n} sectors. Sectors: {', '.join(names)}.\n"
+        raw_data = f"Economy Basics:\n- Number of sectors: {n}\n- Sector Names: {', '.join(names)}\n\n"
+        
+        raw_data += "1. Technical Coefficients Matrix (Input-Output Matrix 'A'):\n"
+        for i in range(n):
+            raw_data += f"   Row {i+1} ({names[i]}): " + ", ".join([f"{val:.4f}" for val in A_np[i]]) + "\n"
+        
+        raw_data += "\n2. Final External Demand ('D'):\n"
+        for i in range(n):
+            raw_data += f"   {names[i]}: {D_np[i]:.2f}\n"
+
+        raw_data += "\n3. Leontief Inverse Matrix ('L'):\n"
+        raw_data += "   (This shows the total direct and indirect requirements across all sectors)\n"
+        for i in range(n):
+            raw_data += f"   Row {i+1} ({names[i]}): " + ", ".join([f"{val:.4f}" for val in L[i]]) + "\n"
+
+        raw_data += "\n4. Total Output Results Engine ('X'):\n"
         for i in range(n):
             ripple = X[i] - D[i]
-            report_text += f"Sector {names[i]}: Demand={D[i]}, Total Output={X[i]:.2f}, Ripple Effect={ripple:.2f}\n"
+            raw_data += f"   {names[i]}: Demand={D[i]:.2f}, Total Output Produced={X[i]:.2f}, Total Ripple Effect={ripple:.2f}\n"
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
         
-        prompt_text = f"Here is an economic ripple effect report:\n\n{report_text}\n\nPlease provide a short, concise, and insightful plain-text summary (no markdown formatting please, or just simple text). Highlight the sectors with the biggest ripple effects."
+        prompt_text = f"Here is the complete math and data for an economic ripple effect simulator using the Leontief Input-Output model:\n\n{raw_data}\n\nPlease provide a short, concise, and insightful plain-text summary (no markdown formatting please, or just simple text/html). Highlight the key insights from the Leontief Inverse Matrix and the sectors with the biggest ripple effects."
         
         global chat_history_state
         chat_history_state = [{"role": "user", "parts": [{"text": prompt_text}]}]
