@@ -342,3 +342,75 @@ input::placeholder {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Chat Interface */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 400px;
+    margin-top: 1rem;
+}
+
+.chat-history {
+    flex: 1;
+    background-color: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    scroll-behavior: smooth;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-bubble {
+    max-width: 85%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-break: break-word;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.chat-bubble.user {
+    align-self: flex-end;
+    background-color: var(--accent-blue);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.model {
+    align-self: flex-start;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-bottom-left-radius: 2px;
+}
+
+.chat-bubble.error {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+.typing-indicator {
+    display: inline-block;
+    color: var(--accent-gold);
+    font-weight: bold;
+    letter-spacing: 2px;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+}

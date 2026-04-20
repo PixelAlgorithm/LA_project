@@ -1,6 +1,10 @@
 from pyscript import document
 from pyscript import window
 import numpy as np
+import json
+from pyodide.http import pyfetch
+
+chat_history_state = []
 
 def sync_headers(event):
     try:
@@ -73,7 +77,7 @@ def load_sample(event=None):
             document.getElementById(f"A_{i}_{j}").value = str(A[i][j])
         document.getElementById(f"D_{i}").value = str(D[i])
 
-def calculate(event=None):
+async def calculate(event=None):
     try:
         size_entry = document.getElementById("size_entry")
         try:
@@ -149,6 +153,146 @@ def calculate(event=None):
             
         document.getElementById("full_report").innerHTML = full
 
+        # ---- Render AI Summary ----
+        env_api_key = "GEMINI_API_KEY_PLACEHOLDER"
+        api_key = env_api_key if env_api_key != "GEMINI_API_KEY_PLACEHOLDER" else window.localStorage.getItem("gemini_api_key")
+        
+        if not api_key:
+            document.getElementById("ai_summary").innerHTML = "<p class='placeholder-text' style='color: var(--accent-gold);'>Please enter and save a Gemini API Key above to enable AI summaries.</p>"
+            return
+
+        document.getElementById("ai_summary").innerHTML = "<p class='placeholder-text' style='opacity: 0.8;'>Generating AI summary using Gemini Flash... please wait.</p>"
+        
+        chat_el = document.getElementById("chat_section")
+        if chat_el: chat_el.style.display = "none"
+
+        report_text = f"Economy Size: {n} sectors. Sectors: {', '.join(names)}.\n"
+        for i in range(n):
+            ripple = X[i] - D[i]
+            report_text += f"Sector {names[i]}: Demand={D[i]}, Total Output={X[i]:.2f}, Ripple Effect={ripple:.2f}\n"
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        
+        prompt_text = f"Here is an economic ripple effect report:\n\n{report_text}\n\nPlease provide a short, concise, and insightful plain-text summary (no markdown formatting please, or just simple text). Highlight the sectors with the biggest ripple effects."
+        
+        global chat_history_state
+        chat_history_state = [{"role": "user", "parts": [{"text": prompt_text}]}]
+
+        payload = {
+            "contents": chat_history_state,
+            "systemInstruction": {
+                "parts": [{"text": "You are a helpful and expert economics tutor. Use plain text or HTML <br> tags instead of markdown asterisks. Keep answers conversational, straightforward, and no longer than a few paragraphs."}]
+            }
+        }
+
+        try:
+            response = await pyfetch(
+                url,
+                method="POST",
+                headers={"Content-Type": "application/json"},
+                body=json.dumps(payload)
+            )
+            data = await response.json()
+            if "candidates" in data and len(data["candidates"]) > 0:
+                summary_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                # Convert newlines to HTML breaks
+                summary_html = summary_text.replace('\n', '<br>')
+                document.getElementById("ai_summary").innerHTML = f"<p style='color: var(--text-secondary); line-height: 1.6;'>{summary_html}</p>"
+                
+                chat_history_state.append({"role": "model", "parts": [{"text": summary_text}]})
+                if chat_el:
+                    chat_el.style.display = "block"
+                    document.getElementById("chat_history").innerHTML = f"<div class='chat-bubble model'>I have finished analyzing the report! What questions do you have about the ripple effects or the Leontief model?</div>"
+            else:
+                document.getElementById("ai_summary").innerHTML = "<p style='color: #ef4444;'>Failed to generate AI summary: Unexpected response format.</p>"
+        except Exception as e:
+            document.getElementById("ai_summary").innerHTML = f"<p style='color: #ef4444;'>Failed to call Gemini API: {str(e)}</p>"
         
     except Exception as e:
         window.alert(f"Calculation Error: {str(e)}\n\nMake sure all fields are filled with valid numbers and that the matrix represents a viable productive economy.")
+
+def save_api_key(event=None):
+    key_input = document.getElementById("api_key_input").value
+    if key_input and key_input.strip():
+        window.localStorage.setItem("gemini_api_key", key_input.strip())
+        window.alert("API Key saved securely in your browser's local storage!")
+        document.getElementById("api_key_input").value = ""
+    else:
+        window.alert("Please enter a valid API Key.")
+
+def clear_api_key(event=None):
+    window.localStorage.removeItem("gemini_api_key")
+    window.alert("API Key removed from browser.")
+
+# Hide API Key UI immediately if environment key is provided by GitHub Actions
+env_api_key = "GEMINI_API_KEY_PLACEHOLDER"
+if env_api_key != "GEMINI_API_KEY_PLACEHOLDER":
+    ui_el = document.getElementById("ai_key_ui")
+    if ui_el:
+        ui_el.style.display = "none"
+
+async def send_chat_message(event=None):
+    global chat_history_state
+    input_el = document.getElementById("chat_input")
+    message = input_el.value.strip()
+    if not message:
+        return
+        
+    input_el.value = ""
+    
+    chat_hist_el = document.getElementById("chat_history")
+    user_bubble = f"<div class='chat-bubble user'>{message}</div>"
+    chat_hist_el.innerHTML += user_bubble
+    chat_hist_el.scrollTo(0, chat_hist_el.scrollHeight)
+    
+    env_api_key = "GEMINI_API_KEY_PLACEHOLDER"
+    api_key = env_api_key if env_api_key != "GEMINI_API_KEY_PLACEHOLDER" else window.localStorage.getItem("gemini_api_key")
+    if not api_key:
+        return
+        
+    chat_history_state.append({"role": "user", "parts": [{"text": message}]})
+    
+    loading_id = f"loading_{np.random.randint(1000, 9999)}"
+    chat_hist_el.innerHTML += f"<div id='{loading_id}' class='chat-bubble model typing-indicator'>...</div>"
+    chat_hist_el.scrollTo(0, chat_hist_el.scrollHeight)
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    payload = {
+        "contents": chat_history_state,
+        "systemInstruction": {
+            "parts": [{"text": "You are a helpful and expert economics tutor. Answer the user's questions about the previous economic report. Use plain text or HTML <br> tags instead of markdown asterisks. Keep answers conversational, straightforward, and no longer than a few paragraphs."}]
+        }
+    }
+    
+    try:
+        response = await pyfetch(
+            url,
+            method="POST",
+            headers={"Content-Type": "application/json"},
+            body=json.dumps(payload)
+        )
+        data = await response.json()
+        doc_loading = document.getElementById(loading_id)
+        if doc_loading: doc_loading.remove()
+        
+        if "candidates" in data and len(data["candidates"]) > 0:
+            reply_text = data["candidates"][0]["content"]["parts"][0]["text"]
+            chat_history_state.append({"role": "model", "parts": [{"text": reply_text}]})
+            
+            reply_html = reply_text.replace('\n', '<br>')
+            chat_hist_el.innerHTML += f"<div class='chat-bubble model'>{reply_html}</div>"
+            chat_hist_el.scrollTo(0, chat_hist_el.scrollHeight)
+        else:
+            chat_hist_el.innerHTML += f"<div class='chat-bubble model error'>I encountered an error understanding that.</div>"
+    except Exception as e:
+        doc_loading = document.getElementById(loading_id)
+        if doc_loading: doc_loading.remove()
+        chat_hist_el.innerHTML += f"<div class='chat-bubble model error'>API Error: {str(e)}</div>"
+
+def handle_chat_keydown(event):
+    if getattr(event, 'key', '') == 'Enter':
+        import asyncio
+        asyncio.ensure_future(send_chat_message())
+
+
+

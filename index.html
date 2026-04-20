@@ -71,6 +71,34 @@
                 </div>
             </section>
         </div>
+
+        <section class="card frosted report-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; padding-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">✨ AI Summary (Gemini Flash)</h2>
+                <div id="ai_key_ui" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="password" id="api_key_input" placeholder="Enter Gemini API Key..." class="input-field" style="width: 200px; font-size: 0.85rem; padding: 0.5rem;">
+                    <button class="btn btn-secondary" py-click="save_api_key" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Save Key</button>
+                    <button class="btn btn-secondary" py-click="clear_api_key" style="padding: 0.5rem 1rem; font-size: 0.85rem; background-color: var(--bg-secondary);">Clear</button>
+                </div>
+            </div>
+            <div id="ai_summary" class="report-content">
+                <p class="placeholder-text">AI generated summary will appear here.</p>
+            </div>
+        </section>
+
+        <!-- CHAT CONSOLE -->
+        <section class="card frosted report-card" id="chat_section" style="display: none;">
+            <h2>💬 Ask Questions About the Report</h2>
+            <div class="chat-container">
+                <div id="chat_history" class="chat-history">
+                    <!-- Chat bubbles go here -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat_input" placeholder="Ask a question about the ripple effect..." class="input-field" style="flex: 1;" py-keydown="handle_chat_keydown">
+                    <button class="btn btn-primary" py-click="send_chat_message">Send</button>
+                </div>
+            </div>
+        </section>
     </div>
 
     <!-- Loading overlay for PyScript startup -->
