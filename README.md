@@ -25,7 +25,7 @@ By applying `numpy` matrix inversions via PyScript natively in the browser, the 
 | :--- | :--- |
 | PES2UG24CS910 | Prajwal M |
 | PES2UG24CS150 | Deepthi V |
-| PES2UG24CS917 | R.P Pranav |
+| PES2UG24CS917 | R P Pranav |
 | PES2UG24CS159 | Dimpal N |
 
 ---
